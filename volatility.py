@@ -172,10 +172,17 @@ if __name__ == '__main__':
     func_vol = partial(vol_forecast,sys_dir = sys_dir)
     func_return = partial(return_forecast,sys_dir = sys_dir)
 
-    # with Pool(processes = ncores) as pool:
-    #     pool.map(func_vol,symbols)
-    #     pool.close()
-    #     pool.join()
+    sys_dir = '/Users/wan/Documents/Schonfeld'
+    seperate_by_ticker(sys_dir)
+
+    ticker_lst = get_symbols(sys_dir)
+    sample_freq = 'W-MON'
+    sub_sample_all(sys_dir,ticker_lst,sample_freq)
+
+    with Pool(processes = ncores) as pool:
+         pool.map(func_vol,symbols)
+         pool.close()
+         pool.join()
 
     with Pool(processes = ncores) as pool:
         pool.map(func_return,symbols)
