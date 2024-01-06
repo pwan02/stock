@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 
 from functools import partial
 from multiprocessing import Pool
+from volatility import *
 
 def expand_vol(sys_dir):
     dirct = f'{sys_dir}/data.csv'
@@ -48,7 +49,9 @@ def generate_cov_mt(sys_dir, start_index, end_index):
     return cov_values, scaler.var_
 
 def gradient_cov_part(weight):
-    cov_values, scale = generate_cov_mt(sys_dir)
+    start_index = 0
+    end_index = 225
+    cov_values, scale = generate_cov_mt(sys_dir,start_index, end_index)
     n = len(weight):
     gradient = [0]*n
     
@@ -77,7 +80,7 @@ def gradient_return_part(date,weight,scale):
         tmp = pd.read_csv(dirct,compression = 'gzip')
         mean.append(tmp.loc[tmp['date'] == date]['volatility'].values)
     gradient = np.multiply(2*np.multiply(mean, weight),1/scale)
-    return gradient
+    return -gradient
 
 def gradient_all(date,weight):
     gradient_cov, scale = gradient_cov_part(weight)
@@ -89,5 +92,16 @@ def gradient_descent(date,weight,num_itera):
     for i in range(num_itera):
         weight += gradient_all(date,weight)
     return weight
+
+if __name__ == '__main__':
+    sys_dir = '/Users/wan/Documents/Schonfeld'
+    expand_vol(sys_dir)
+    symbols = get_symbols(sys_dir)
+    n = len(symbols)
+    num_itera = 30
+
+    date = '20140101'
+    initial_weight = ([1]*n)/n
+    optimal_weight = gradient_descent(date,initial_weight,num_itera)
     
     
